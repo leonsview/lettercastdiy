@@ -4,6 +4,8 @@ This server page is the marketing homepage.
 </ai_context>
 */
 
+"use client"
+
 import { FeaturesSection } from "@/components/landing/features"
 import { HeroSection } from "@/components/landing/hero"
 
