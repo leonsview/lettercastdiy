@@ -15,6 +15,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { SelectProfile } from "@/db/schema"
 import { updateProfileAction } from "@/actions/db/profiles-actions"
+import { checkNewsletterExistsAction, createNewsletterAction } from "@/actions/db/newsletters-actions"
 
 interface ProfileFormProps {
   userId: string
@@ -24,6 +25,7 @@ interface ProfileFormProps {
 interface FormValues {
   email: string
   phone: string
+  newsletter: string
 }
 
 export default function ProfileForm({ userId, initialData }: ProfileFormProps) {
@@ -32,18 +34,73 @@ export default function ProfileForm({ userId, initialData }: ProfileFormProps) {
   const form = useForm<FormValues>({
     defaultValues: {
       email: initialData?.email || "",
-      phone: initialData?.phone || ""
+      phone: initialData?.phone || "",
+      newsletter: ""
     }
   })
 
-  function onSubmit(values: FormValues) {
+  async function onSubmit(values: FormValues) {
     startTransition(async () => {
-      const { isSuccess, message } = await updateProfileAction(userId, values)
+      if (values.newsletter) {
+        // Split newsletter input by commas and trim whitespace
+        const newsletterEmails = values.newsletter
+          .split(",")
+          .map(email => email.trim())
+          .filter(email => email.length > 0) // Remove empty entries
 
-      if (isSuccess) {
-        toast.success(message)
+        const currentNewsletters = initialData?.newsletters || []
+        const newNewsletters: string[] = []
+
+        // Process each newsletter email
+        for (const email of newsletterEmails) {
+          // Skip if already in user's profile
+          if (currentNewsletters.includes(email)) {
+            toast.info(`${email} already in your profile`)
+            continue
+          }
+
+          // Check if newsletter exists in database
+          const { isSuccess: checkSuccess, data: exists } = await checkNewsletterExistsAction(email)
+          
+          if (!checkSuccess) {
+            toast.error(`Failed to check newsletter: ${email}`)
+            continue
+          }
+
+          if (!exists) {
+            // Create new newsletter entry
+            const { isSuccess: createSuccess } = await createNewsletterAction(email)
+            if (!createSuccess) {
+              toast.error(`Failed to create newsletter: ${email}`)
+              continue
+            }
+          }
+
+          newNewsletters.push(email)
+        }
+
+        // Update profile with new newsletters if any were added
+        if (newNewsletters.length > 0) {
+          const { isSuccess, message } = await updateProfileAction(userId, {
+            ...values,
+            newsletters: [...currentNewsletters, ...newNewsletters]
+          })
+
+          if (isSuccess) {
+            toast.success(`Added ${newNewsletters.length} new newsletter(s)`)
+            form.reset({ ...values, newsletter: "" })
+          } else {
+            toast.error(message)
+          }
+        }
       } else {
-        toast.error(message)
+        // Just update profile without newsletter changes
+        const { isSuccess, message } = await updateProfileAction(userId, values)
+        if (isSuccess) {
+          toast.success(message)
+        } else {
+          toast.error(message)
+        }
       }
     })
   }
@@ -78,6 +135,31 @@ export default function ProfileForm({ userId, initialData }: ProfileFormProps) {
             </FormItem>
           )}
         />
+
+        <FormField
+          control={form.control}
+          name="newsletter"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Add Newsletter</FormLabel>
+              <FormControl>
+                <Input placeholder="Enter newsletter emails (comma-separated)" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <div className="space-y-2">
+          <h3 className="font-medium">Your Newsletters</h3>
+          <div className="space-y-1">
+            {initialData?.newsletters?.map((newsletter, index) => (
+              <div key={index} className="text-sm text-muted-foreground">
+                {newsletter}
+              </div>
+            ))}
+          </div>
+        </div>
 
         <Button type="submit" disabled={isPending}>
           {isPending ? "Saving..." : "Save Changes"}
