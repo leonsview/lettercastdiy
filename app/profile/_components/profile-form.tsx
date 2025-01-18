@@ -16,6 +16,7 @@ import { Input } from "@/components/ui/input"
 import { SelectProfile } from "@/db/schema"
 import { updateProfileAction } from "@/actions/db/profiles-actions"
 import { checkNewsletterExistsAction, createNewsletterAction } from "@/actions/db/newsletters-actions"
+import { sendWhatsAppWelcomeAction } from "@/actions/whatsapp-actions"
 
 interface ProfileFormProps {
   userId: string
@@ -43,6 +44,28 @@ export default function ProfileForm({ userId, initialData }: ProfileFormProps) {
 
   async function onSubmit(values: FormValues) {
     startTransition(async () => {
+      // Check if phone number was added or changed
+      const phoneChanged = values.phone !== initialData?.phone && values.phone !== ""
+      
+      // Update profile first
+      const { isSuccess, message } = await updateProfileAction(userId, values)
+      if (!isSuccess) {
+        toast.error(message)
+        return
+      }
+      
+      // If profile update was successful
+      toast.success(message)
+      
+      // If phone number was added/changed, try to send WhatsApp welcome message
+      if (phoneChanged) {
+        const { isSuccess: whatsappSuccess, message: whatsappMessage } = await sendWhatsAppWelcomeAction(values.phone)
+        if (!whatsappSuccess) {
+          toast.error(whatsappMessage)
+        }
+      }
+
+      // Handle newsletter updates if any
       if (values.newsletter) {
         // Split newsletter input by commas and trim whitespace
         const newsletterEmails = values.newsletter
@@ -83,25 +106,16 @@ export default function ProfileForm({ userId, initialData }: ProfileFormProps) {
 
         // Update profile with new newsletters if any were added
         if (newNewsletters.length > 0) {
-          const { isSuccess, message } = await updateProfileAction(userId, {
-            ...values,
+          const { isSuccess: updateSuccess, message: updateMessage } = await updateProfileAction(userId, {
             newsletters: [...currentNewsletters, ...newNewsletters]
           })
 
-          if (isSuccess) {
+          if (updateSuccess) {
             toast.success(`Added ${newNewsletters.length} new newsletter(s)`)
             form.reset({ ...values, newsletter: "" })
           } else {
-            toast.error(message)
+            toast.error(updateMessage)
           }
-        }
-      } else {
-        // Just update profile without newsletter changes
-        const { isSuccess, message } = await updateProfileAction(userId, values)
-        if (isSuccess) {
-          toast.success(message)
-        } else {
-          toast.error(message)
         }
       }
     })
