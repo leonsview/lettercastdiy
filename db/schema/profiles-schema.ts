@@ -10,6 +10,9 @@ export const membershipEnum = pgEnum("membership", ["free", "pro"])
 
 export const profilesTable = pgTable("profiles", {
   userId: text("user_id").primaryKey().notNull(),
+  firstName: text("first_name"),
+  email: text("email"),
+  phone: text("phone"),
   membership: membershipEnum("membership").notNull().default("free"),
   stripeCustomerId: text("stripe_customer_id"),
   stripeSubscriptionId: text("stripe_subscription_id"),

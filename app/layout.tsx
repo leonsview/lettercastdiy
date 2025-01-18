@@ -8,7 +8,6 @@ import {
   createProfileAction,
   getProfileByUserIdAction
 } from "@/actions/db/profiles-actions"
-import { Toaster } from "@/components/ui/toaster"
 import { PostHogPageview } from "@/components/utilities/posthog/posthog-pageview"
 import { PostHogUserIdentify } from "@/components/utilities/posthog/posthog-user-identity"
 import { Providers } from "@/components/utilities/providers"
@@ -18,13 +17,14 @@ import { ClerkProvider } from "@clerk/nextjs"
 import { auth } from "@clerk/nextjs/server"
 import type { Metadata } from "next"
 import { Inter } from "next/font/google"
+import { Toaster as SonnerToaster } from "sonner"
 import "./globals.css"
 
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "Mckay's App Template",
-  description: "A full-stack web app template."
+  title: "lettercast.fyi",
+  description: "Your newsletters turned into podcasts."
 }
 
 export default async function RootLayout({
@@ -62,8 +62,7 @@ export default async function RootLayout({
             {children}
 
             <TailwindIndicator />
-
-            <Toaster />
+            <SonnerToaster />
           </Providers>
         </body>
       </html>

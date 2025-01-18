@@ -60,18 +60,14 @@ export async function updateProfileAction(
   try {
     const [updatedProfile] = await db
       .update(profilesTable)
-      .set(data)
+      .set({ ...data, updatedAt: new Date() })
       .where(eq(profilesTable.userId, userId))
       .returning()
-
-    if (!updatedProfile) {
-      return { isSuccess: false, message: "Profile not found to update" }
-    }
 
     return {
       isSuccess: true,
       message: "Profile updated successfully",
-      data: updatedProfile
+      data: updatedProfile,
     }
   } catch (error) {
     console.error("Error updating profile:", error)
@@ -124,5 +120,23 @@ export async function deleteProfileAction(
   } catch (error) {
     console.error("Error deleting profile:", error)
     return { isSuccess: false, message: "Failed to delete profile" }
+  }
+}
+
+export async function getProfileAction(
+  userId: string
+): Promise<ActionState<SelectProfile | undefined>> {
+  try {
+    const profile = await db.query.profiles.findFirst({
+      where: eq(profilesTable.userId, userId),
+    })
+    return {
+      isSuccess: true,
+      message: "Profile retrieved successfully",
+      data: profile,
+    }
+  } catch (error) {
+    console.error("Error getting profile:", error)
+    return { isSuccess: false, message: "Failed to get profile" }
   }
 }

@@ -8,6 +8,20 @@
       "when": 1725104620592,
       "tag": "0000_nostalgic_mauler",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1737206601649,
+      "tag": "0001_nostalgic_hydra",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1737207379219,
+      "tag": "0002_loud_baron_strucker",
+      "breakpoints": true
     }
   ]
 }
