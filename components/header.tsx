@@ -25,8 +25,6 @@ const navLinks = [
   { href: "/contact", label: "Contact" }
 ]
 
-const signedInLinks = [{ href: "/todo", label: "Todo" }]
-
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [isScrolled, setIsScrolled] = useState(false)
@@ -72,15 +70,7 @@ export default function Header() {
           ))}
 
           <SignedIn>
-            {signedInLinks.map(link => (
-              <Link
-                key={link.href}
-                href={link.href}
-                className="rounded-full px-3 py-1 hover:opacity-80"
-              >
-                {link.label}
-              </Link>
-            ))}
+            <UserButton />
           </SignedIn>
         </nav>
 
@@ -96,10 +86,6 @@ export default function Header() {
               <Button className="bg-blue-500 hover:bg-blue-600">Sign Up</Button>
             </SignUpButton>
           </SignedOut>
-
-          <SignedIn>
-            <UserButton />
-          </SignedIn>
 
           <div className="md:hidden">
             <Button
@@ -142,17 +128,7 @@ export default function Header() {
               </li>
             ))}
             <SignedIn>
-              {signedInLinks.map(link => (
-                <li key={link.href}>
-                  <Link
-                    href={link.href}
-                    className="block hover:underline"
-                    onClick={toggleMenu}
-                  >
-                    {link.label}
-                  </Link>
-                </li>
-              ))}
+              <UserButton />
             </SignedIn>
           </ul>
         </nav>
