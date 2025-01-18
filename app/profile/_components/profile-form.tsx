@@ -23,6 +23,7 @@ interface ProfileFormProps {
 }
 
 interface FormValues {
+  firstName: string
   email: string
   phone: string
   newsletter: string
@@ -33,6 +34,7 @@ export default function ProfileForm({ userId, initialData }: ProfileFormProps) {
 
   const form = useForm<FormValues>({
     defaultValues: {
+      firstName: initialData?.firstName || "",
       email: initialData?.email || "",
       phone: initialData?.phone || "",
       newsletter: ""
@@ -108,6 +110,20 @@ export default function ProfileForm({ userId, initialData }: ProfileFormProps) {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <FormField
+          control={form.control}
+          name="firstName"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>First Name</FormLabel>
+              <FormControl>
+                <Input placeholder="Enter your first name" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
         <FormField
           control={form.control}
           name="email"
