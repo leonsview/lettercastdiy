@@ -1,24 +1,31 @@
+"use client"
+
 import { Button } from "@/components/ui/button"
 import { ArrowRight, Headphones, Clock, Inbox, Zap } from 'lucide-react'
+import Link from "next/link"
 
 export default function LandingPage() {
   return (
     <div className="min-h-screen bg-white text-gray-900 flex flex-col">
       <header className="container mx-auto px-4 py-6 flex justify-between items-center">
         <h1 className="text-2xl font-bold">Lettercast</h1>
-        <Button variant="outline" size="sm">Login</Button>
+        <Link href="/login">
+          <Button variant="outline" size="sm">Login</Button>
+        </Link>
       </header>
 
       <main className="flex-grow">
         <section className="container mx-auto px-4 py-20 text-center">
-          <h2 className="text-4xl md:text-5xl font-bold mb-6">Transform Newsletter Chaos into Your Personal Audio Digest</h2>
-          <p className="text-xl mb-8 max-w-2xl mx-auto">
+          <h2 className="text-3xl md:text-4xl font-bold mb-6">Transform Newsletter Chaos into Your Personal Podcast</h2>
+          <p className="text-lg mb-8 max-w-2xl mx-auto">
             Break free from inbox overwhelm. Get the insights you love, delivered as a weekly AI-powered podcast episode – right to your WhatsApp.
           </p>
-          <Button size="lg" className="animate-pulse">
-            Get Started
-            <ArrowRight className="ml-2" />
-          </Button>
+          <Link href="/signup">
+            <Button size="lg" className="animate-pulse">
+              Get Started
+              <ArrowRight className="ml-2" />
+            </Button>
+          </Link>
         </section>
 
         <section className="bg-gray-50 py-20">
@@ -63,17 +70,23 @@ export default function LandingPage() {
             <p className="text-xl mb-8 max-w-2xl mx-auto">
               Join the revolution in personalized content consumption. Experience your newsletters in a whole new way with Lettercast.
             </p>
-            <Button size="lg" variant="outline" className="text-gray-900 border-white hover:bg-white hover:text-gray-900">
-              Get Started
-              <ArrowRight className="ml-2" />
-            </Button>
+            <Link href="/signup">
+              <Button 
+                size="lg" 
+                variant="outline" 
+                className="text-gray-900 border-white hover:bg-white hover:text-gray-900"
+              >
+                Get Started
+                <ArrowRight className="ml-2" />
+              </Button>
+            </Link>
           </div>
         </section>
       </main>
 
       <footer className="bg-gray-100 py-8">
         <div className="container mx-auto px-4 text-center text-sm text-gray-600">
-          © 2023 Lettercast. All rights reserved.
+          © 2025 Lettercast. All rights reserved.
         </div>
       </footer>
     </div>
