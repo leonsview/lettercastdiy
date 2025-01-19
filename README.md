@@ -1,67 +1,62 @@
-# Mckay's App Template
+# Lettercast
 
-This is a full-stack app template for courses on [Takeoff](https://JoinTakeoff.com/).
+Transform your newsletters into personalized podcasts delivered via WhatsApp.
 
-## Sponsors
+## Overview
 
-If you are interested in sponsoring my repos, please contact me at [ads@takeoffai.org](mailto:ads@takeoffai.org).
+Lettercast is a modern web application that converts newsletter content into audio format, making it easier to consume information on the go. Get the insights you love, delivered as a weekly AI-powered podcast episode right to your WhatsApp.
 
-Or sponsor me directly on [GitHub Sponsors](https://github.com/sponsors/mckaywrigley).
+## Features
+
+- **Newsletter Integration**: Connect your favorite newsletters to Lettercast for automated inbox management
+- **AI-Powered Audio Generation**: Weekly personalized podcast episodes highlighting relevant insights
+- **WhatsApp Delivery**: Receive audio digests and text summaries directly via WhatsApp
+- **Time-Saving**: Get the essence of all your newsletters in just 15 minutes
+- **Zero Inbox Clutter**: Automated newsletter management
+- **Ultra-Convenient**: Listen on WhatsApp – no additional apps needed
+- **Personalization**: Each episode is crafted specifically for your interests
 
 ## Tech Stack
 
-- IDE: [Cursor](https://www.cursor.com/)
-- AI Tools: [V0](https://v0.dev/), [Perplexity](https://www.perplexity.com/)
-- Frontend: [Next.js](https://nextjs.org/docs), [Tailwind](https://tailwindcss.com/docs/guides/nextjs), [Shadcn](https://ui.shadcn.com/docs/installation), [Framer Motion](https://www.framer.com/motion/introduction/)
-- Backend: [PostgreSQL](https://www.postgresql.org/about/), [Supabase](https://supabase.com/), [Drizzle](https://orm.drizzle.team/docs/get-started-postgresql), [Server Actions](https://nextjs.org/docs/app/building-your-application/data-fetching/server-actions-and-mutations)
-- Auth: [Clerk](https://clerk.com/)
-- Payments: [Stripe](https://stripe.com/)
-- Analytics: [PostHog](https://posthog.com/)
+### Frontend
+- Next.js
+- Tailwind CSS
+- Shadcn UI
+- Framer Motion
 
-## Prerequisites
+### Backend
+- PostgreSQL
+- Supabase
+- Drizzle ORM
+- Server Actions
 
-You will need accounts for the following services.
+### Authentication
+- Clerk
 
-They all have free plans that you can use to get started.
+### Payments
+- Stripe
 
-- Create a [Cursor](https://www.cursor.com/) account
-- Create a [GitHub](https://github.com/) account
-- Create a [Supabase](https://supabase.com/) account
-- Create a [Clerk](https://clerk.com/) account
-- Create a [Stripe](https://stripe.com/) account
-- Create a [PostHog](https://posthog.com/) account
-- Create a [Vercel](https://vercel.com/) account
+### Deployment
+- Vercel
 
-You will likely not need paid plans unless you are building a business.
+## Project Structure
 
-## Environment Variables
-
-```bash
-# DB (Supabase)
-DATABASE_URL=
-
-# Auth (Clerk)
-NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=
-CLERK_SECRET_KEY=
-NEXT_PUBLIC_CLERK_SIGN_IN_URL=/login
-NEXT_PUBLIC_CLERK_SIGN_UP_URL=/signup
-
-# Payments (Stripe)
-STRIPE_SECRET_KEY=
-STRIPE_WEBHOOK_SECRET=
-NEXT_PUBLIC_STRIPE_PORTAL_LINK=
-NEXT_PUBLIC_STRIPE_PAYMENT_LINK_YEARLY=
-NEXT_PUBLIC_STRIPE_PAYMENT_LINK_MONTHLY=
-
-# Analytics (PostHog)
-NEXT_PUBLIC_POSTHOG_KEY=
-NEXT_PUBLIC_POSTHOG_HOST=
+```
+lettercast/
+├── actions/           # Server actions
+│   └── db/           # Database related actions
+├── app/              # Next.js app router
+│   ├── api/          # API routes
+│   └── route/        # Route components
+├── components/       # Shared components
+│   ├── ui/          # UI components
+│   └── utilities/   # Utility components
+├── db/              # Database
+│   └── schema/      # Database schemas
+├── lib/             # Library code
+│   └── hooks/       # Custom hooks
+├── prompts/         # Prompt files
+├── public/          # Static assets
+└── types/           # Type definitions
 ```
 
-## Setup
-
-1. Clone the repository
-2. Copy `.env.example` to `.env.local` and fill in the environment variables from above
-3. Run `npm install` to install dependencies
-4. Run `npm run dev` to run the app locally
-# lettercast
