@@ -5,57 +5,8 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1725104620592,
-      "tag": "0000_nostalgic_mauler",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "7",
-      "when": 1737206601649,
-      "tag": "0001_nostalgic_hydra",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "7",
-      "when": 1737207379219,
-      "tag": "0002_loud_baron_strucker",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "7",
-      "when": 1737216362343,
-      "tag": "0003_abandoned_christian_walker",
-      "breakpoints": true
-    },
-    {
-      "idx": 4,
-      "version": "7",
-      "when": 1737218797234,
-      "tag": "0004_absurd_hellfire_club",
-      "breakpoints": true
-    },
-    {
-      "idx": 5,
-      "version": "7",
-      "when": 1737227475911,
-      "tag": "0005_magical_radioactive_man",
-      "breakpoints": true
-    },
-    {
-      "idx": 6,
-      "version": "7",
-      "when": 1737228432895,
-      "tag": "0006_salty_madripoor",
-      "breakpoints": true
-    },
-    {
-      "idx": 7,
-      "version": "7",
-      "when": 1737229383338,
-      "tag": "0007_chunky_guardian",
+      "when": 1737282654875,
+      "tag": "0000_sleepy_lilandra",
       "breakpoints": true
     }
   ]
