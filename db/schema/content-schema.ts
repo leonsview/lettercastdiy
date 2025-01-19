@@ -6,7 +6,7 @@ export const contentTable = pgTable("content", {
   newsletterEmailId: text("newsletter-email-id")
     .references(() => newslettersTable.newsletteremailid, { onDelete: "cascade" })
     .notNull(),
-  newsletterName: text("newsletter_name"),
+  subject_line: text("subject_line"),
   sentAt: timestamp("sent_at").defaultNow().notNull(),
   content: text("content").notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),

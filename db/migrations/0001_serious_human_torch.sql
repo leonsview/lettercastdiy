@@ -1,0 +1,1 @@
+ALTER TABLE "content" ADD COLUMN "subject_line" text;
