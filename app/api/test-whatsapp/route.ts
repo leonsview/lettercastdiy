@@ -6,7 +6,7 @@ import { sendWhatsAppPodcastAction } from "@/actions/whatsapp-actions"
 export async function GET() {
   try {
     // Use a specific podcast ID and user ID for testing
-    const podcastId = 3 // Replace with an existing podcast ID
+    const podcastId = 6 // Replace with an existing podcast ID
     const userId = "user_2rniuxA4mw3xkouh5PiKTyQtv0W" // Replace with an existing user ID
 
     // Get the podcast

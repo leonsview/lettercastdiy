@@ -1,6 +1,6 @@
 "use client"
 
-import { useTransition } from "react"
+import { useTransition, useState } from "react"
 import { useForm } from "react-hook-form"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
@@ -32,6 +32,8 @@ interface FormValues {
 
 export default function ProfileForm({ userId, initialData }: ProfileFormProps) {
   const [isPending, startTransition] = useTransition()
+  const [newsletters, setNewsletters] = useState<string[]>(initialData?.newsletters || [])
+  const [isTestingWhatsApp, setIsTestingWhatsApp] = useState(false)
 
   const form = useForm<FormValues>({
     defaultValues: {
@@ -67,24 +69,19 @@ export default function ProfileForm({ userId, initialData }: ProfileFormProps) {
 
       // Handle newsletter updates if any
       if (values.newsletter) {
-        // Split newsletter input by commas and trim whitespace
         const newsletterEmails = values.newsletter
           .split(",")
           .map(email => email.trim())
-          .filter(email => email.length > 0) // Remove empty entries
+          .filter(email => email.length > 0)
 
-        const currentNewsletters = initialData?.newsletters || []
         const newNewsletters: string[] = []
 
-        // Process each newsletter email
         for (const email of newsletterEmails) {
-          // Skip if already in user's profile
-          if (currentNewsletters.includes(email)) {
+          if (newsletters.includes(email)) {
             toast.info(`${email} already in your profile`)
             continue
           }
 
-          // Check if newsletter exists in database
           const { isSuccess: checkSuccess, data: exists } = await checkNewsletterExistsAction(email)
           
           if (!checkSuccess) {
@@ -93,7 +90,6 @@ export default function ProfileForm({ userId, initialData }: ProfileFormProps) {
           }
 
           if (!exists) {
-            // Create new newsletter entry
             const { isSuccess: createSuccess } = await createNewsletterAction(email)
             if (!createSuccess) {
               toast.error(`Failed to create newsletter: ${email}`)
@@ -104,13 +100,14 @@ export default function ProfileForm({ userId, initialData }: ProfileFormProps) {
           newNewsletters.push(email)
         }
 
-        // Update profile with new newsletters if any were added
         if (newNewsletters.length > 0) {
+          const updatedNewsletters = [...newsletters, ...newNewsletters]
           const { isSuccess: updateSuccess, message: updateMessage } = await updateProfileAction(userId, {
-            newsletters: [...currentNewsletters, ...newNewsletters]
+            newsletters: updatedNewsletters
           })
 
           if (updateSuccess) {
+            setNewsletters(updatedNewsletters)
             toast.success(`Added ${newNewsletters.length} new newsletter(s)`)
             form.reset({ ...values, newsletter: "" })
           } else {
@@ -119,6 +116,24 @@ export default function ProfileForm({ userId, initialData }: ProfileFormProps) {
         }
       }
     })
+  }
+
+  async function handleTestWhatsApp() {
+    setIsTestingWhatsApp(true)
+    try {
+      const response = await fetch("/api/test-whatsapp")
+      const data = await response.json()
+      
+      if (data.success) {
+        toast.success("Test WhatsApp message sent successfully!")
+      } else {
+        toast.error(data.error || "Failed to send test WhatsApp message")
+      }
+    } catch (error) {
+      toast.error("Failed to send test WhatsApp message")
+    } finally {
+      setIsTestingWhatsApp(false)
+    }
   }
 
   return (
@@ -183,7 +198,7 @@ export default function ProfileForm({ userId, initialData }: ProfileFormProps) {
         <div className="space-y-2">
           <h3 className="font-medium">Your Newsletters</h3>
           <div className="space-y-1">
-            {initialData?.newsletters?.map((newsletter, index) => (
+            {newsletters.map((newsletter, index) => (
               <div key={index} className="text-sm text-muted-foreground">
                 {newsletter}
               </div>
@@ -191,9 +206,20 @@ export default function ProfileForm({ userId, initialData }: ProfileFormProps) {
           </div>
         </div>
 
-        <Button type="submit" disabled={isPending}>
-          {isPending ? "Saving..." : "Save Changes"}
-        </Button>
+        <div className="flex gap-4">
+          <Button type="submit" disabled={isPending}>
+            {isPending ? "Saving..." : "Save Changes"}
+          </Button>
+
+          <Button 
+            type="button" 
+            variant="secondary"
+            disabled={isTestingWhatsApp || !initialData?.phone}
+            onClick={handleTestWhatsApp}
+          >
+            {isTestingWhatsApp ? "Sending..." : "Receive first lettercast"}
+          </Button>
+        </div>
       </form>
     </Form>
   )

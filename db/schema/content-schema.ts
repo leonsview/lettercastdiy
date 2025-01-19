@@ -3,9 +3,7 @@ import { newslettersTable } from "./newsletters-schema"
 
 export const contentTable = pgTable("content", {
   id: uuid("id").defaultRandom().primaryKey(),
-  newsletterEmailId: text("newsletter-email-id")
-    .references(() => newslettersTable.newsletteremailid, { onDelete: "cascade" })
-    .notNull(),
+  newsletteremail: text("newsletter_email").notNull(),
   subject_line: text("subject_line"),
   sentAt: timestamp("sent_at").defaultNow().notNull(),
   content: text("content").notNull(),

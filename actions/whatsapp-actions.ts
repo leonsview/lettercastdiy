@@ -70,7 +70,7 @@ export async function sendWhatsAppPodcastAction(
     // Send notification message first
     const messageSent = await sendWhatsAppMessage(
       phoneNumber,
-      "🎙️ Your podcast is ready! Sending the audio file now..."
+      "🎙️ Your lettercast is ready! \n\nYou received the following newsletters:\n\n📩 AI Solopreneur: \n12 boring AI opportunities quietly making millions rn\n\n📩 The Rundown AI:\nChatGPT gets proactive with 'Tasks'\n\nSending the audio file now..."
     )
 
     if (!messageSent) {

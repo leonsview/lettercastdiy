@@ -6,9 +6,11 @@ import { eq } from 'drizzle-orm';
 
 export async function GET() {
   try {
+    const podcastId = 6; // Make ID explicit
+    
     // Get the podcast first to check the script
     const podcast = await db.query.podcasts.findFirst({
-      where: eq(podcasts.id, 4)
+      where: eq(podcasts.id, podcastId)
     });
 
     if (!podcast || !podcast.script) {
@@ -17,7 +19,7 @@ export async function GET() {
 
     console.log('Found script:', podcast.script);
     
-    const result = await generateAudioFromScript(3);
+    const result = await generateAudioFromScript(podcastId); // Pass the same ID
 
     return Response.json({ 
       success: true, 

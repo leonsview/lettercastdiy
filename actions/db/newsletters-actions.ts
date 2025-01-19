@@ -10,7 +10,7 @@ export async function checkNewsletterExistsAction(
 ): Promise<ActionState<boolean>> {
   try {
     const newsletter = await db.query.newsletters.findFirst({
-      where: eq(newslettersTable.newsletteremailid, newsletterEmailId)
+      where: eq(newslettersTable.newsletterEmailId, newsletterEmailId)
     })
 
     return {
@@ -29,7 +29,7 @@ export async function createNewsletterAction(
 ): Promise<ActionState<void>> {
   try {
     await db.insert(newslettersTable).values({
-      newsletteremailid: newsletterEmailId,
+      newsletterEmailId: newsletterEmailId,
       subscribed: false
     })
 

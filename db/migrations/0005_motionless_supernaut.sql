@@ -1,0 +1,1 @@
+ALTER TABLE "content" RENAME COLUMN "newsletter_email_id" TO "newsletter_email";
