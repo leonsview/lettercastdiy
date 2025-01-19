@@ -4,6 +4,8 @@ Transform your newsletters into personalized podcasts delivered via WhatsApp.
 
 We started building this project with the start of the hackathon completely from scratch.
 
+try it yourself at: www.lettercast.fyi
+
 ## Overview
 
 Lettercast is a modern web application that converts newsletter content into audio format, making it easier to consume information on the go. Get the insights you love, delivered as a weekly AI-powered podcast episode right to your WhatsApp.
@@ -64,4 +66,4 @@ lettercast/
 
 
 Our tool is 95% complete. 
-The only thing that is not fully working yet is the automatic email scraping but we already have a first draft for it, using the Gmail API it just needs a bit more testing to be reliable.
+The only thing that is not fully working yet is the automatic email scraping but we already have a first draft for it (see the branch: feat/mailscraping), using the Gmail API it just needs a bit more testing to be reliable.
