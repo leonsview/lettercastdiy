@@ -8,7 +8,7 @@ export async function GET() {
   try {
     // Get the podcast first to check the script
     const podcast = await db.query.podcasts.findFirst({
-      where: eq(podcasts.id, 3)
+      where: eq(podcasts.id, 4)
     });
 
     if (!podcast || !podcast.script) {

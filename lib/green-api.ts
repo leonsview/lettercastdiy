@@ -107,3 +107,46 @@ export async function sendWhatsAppMessage(phoneNumber: string, message: string):
     return false
   }
 }
+
+export async function sendWhatsAppFile(phoneNumber: string, fileUrl: string, caption?: string): Promise<boolean> {
+  try {
+    const formattedNumber = formatPhoneNumber(phoneNumber)
+    console.log("Sending WhatsApp file to:", formattedNumber)
+    
+    const response = await fetch(
+      getUrl("sendFileByUrl"),
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          chatId: `${formattedNumber}@c.us`,
+          urlFile: fileUrl,
+          fileName: "podcast.mp3",
+          caption
+        })
+      }
+    )
+
+    if (!response.ok) {
+      const errorText = await response.text()
+      console.error("Green API Error Response:", errorText)
+      throw new Error(`HTTP error! status: ${response.status}, body: ${errorText}`)
+    }
+    
+    const text = await response.text()
+    console.log("Green API Response:", text)
+    
+    try {
+      const data = JSON.parse(text)
+      return !!data.idMessage
+    } catch (e) {
+      console.error("Failed to parse response:", text)
+      throw e
+    }
+  } catch (error) {
+    console.error("Error sending file:", error)
+    return false
+  }
+}

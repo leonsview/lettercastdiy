@@ -3,8 +3,9 @@
 
 import { generateConversationalPodcast } from '@/lib/autocontent';
 import { db } from '@/db/db';
-import { podcasts } from '@/db/schema';
+import { podcasts, profilesTable } from '@/db/schema';
 import { eq } from 'drizzle-orm';
+import { sendWhatsAppPodcastAction } from '@/actions/whatsapp-actions';
 
 export async function generateAudioFromScript(podcastId: number) {
   try {
@@ -31,6 +32,16 @@ export async function generateAudioFromScript(podcastId: number) {
     await db.update(podcasts)
       .set({ audioUrl: result.audioUrl })
       .where(eq(podcasts.id, podcastId));
+
+    // Get the user's phone number from their profile
+    const profile = await db.query.profiles.findFirst({
+      where: eq(profilesTable.userId, podcast.userId)
+    });
+
+    // If user has a phone number, send them a WhatsApp notification
+    if (profile?.phone) {
+      await sendWhatsAppPodcastAction(profile.phone, result.audioUrl);
+    }
 
     return result;
 

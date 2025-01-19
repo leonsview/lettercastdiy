@@ -6,7 +6,7 @@ This file contains server actions for WhatsApp functionality.
 
 "use server"
 
-import { checkWhatsAppNumber, sendWhatsAppMessage } from "@/lib/green-api"
+import { checkWhatsAppNumber, sendWhatsAppMessage, sendWhatsAppFile } from "@/lib/green-api"
 import { ActionState } from "@/types"
 
 export async function sendWhatsAppWelcomeAction(
@@ -47,6 +47,65 @@ export async function sendWhatsAppWelcomeAction(
     return {
       isSuccess: false,
       message: "Failed to send WhatsApp welcome message",
+      data: undefined
+    }
+  }
+}
+
+export async function sendWhatsAppPodcastAction(
+  phoneNumber: string,
+  audioUrl: string
+): Promise<ActionState<void>> {
+  try {
+    // First check if the phone number is on WhatsApp
+    const exists = await checkWhatsAppNumber(phoneNumber)
+    if (!exists) {
+      return {
+        isSuccess: false,
+        message: "Phone number is not registered on WhatsApp",
+        data: undefined
+      }
+    }
+
+    // Send notification message first
+    const messageSent = await sendWhatsAppMessage(
+      phoneNumber,
+      "🎙️ Your podcast is ready! Sending the audio file now..."
+    )
+
+    if (!messageSent) {
+      return {
+        isSuccess: false,
+        message: "Failed to send WhatsApp notification",
+        data: undefined
+      }
+    }
+
+    // Send the audio file
+    const fileSent = await sendWhatsAppFile(
+      phoneNumber,
+      audioUrl,
+      "Here's your podcast! 🎧"
+    )
+
+    if (!fileSent) {
+      return {
+        isSuccess: false,
+        message: "Failed to send podcast audio file",
+        data: undefined
+      }
+    }
+
+    return {
+      isSuccess: true,
+      message: "Podcast sent via WhatsApp successfully",
+      data: undefined
+    }
+  } catch (error) {
+    console.error("Error sending podcast via WhatsApp:", error)
+    return {
+      isSuccess: false,
+      message: "Failed to send podcast via WhatsApp",
       data: undefined
     }
   }
