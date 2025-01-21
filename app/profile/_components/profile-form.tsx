@@ -59,11 +59,14 @@ export default function ProfileForm({ userId, initialData }: ProfileFormProps) {
       // If profile update was successful
       toast.success(message)
       
-      // If phone number was added/changed, try to send WhatsApp welcome message
-      if (phoneChanged) {
+      // If phone number was added/changed and it's different from the last welcomed phone, send welcome message
+      if (phoneChanged && values.phone !== initialData?.lastWelcomedPhone) {
         const { isSuccess: whatsappSuccess, message: whatsappMessage } = await sendWhatsAppWelcomeAction(values.phone)
         if (!whatsappSuccess) {
           toast.error(whatsappMessage)
+        } else {
+          // If welcome message was sent successfully, update the lastWelcomedPhone
+          await updateProfileAction(userId, { lastWelcomedPhone: values.phone })
         }
       }
 

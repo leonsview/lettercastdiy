@@ -50,7 +50,7 @@ export default function LandingPage() {
           <h2 className="text-3xl font-bold mb-12 text-center">Why Choose Lettercast?</h2>
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
             {[
-              { icon: Clock, title: "Save Time", description: "Get the essence of all your newsletters in just 15 minutes" },
+              { icon: Clock, title: "Save Time", description: "Get the essence of all your newsletters in just 10 minutes" },
               { icon: Inbox, title: "Zero Inbox Clutter", description: "Say goodbye to newsletter overwhelm" },
               { icon: Headphones, title: "Ultra-Convenient", description: "Listen on WhatsApp – no new apps needed" },
               { icon: Zap, title: "Perfectly Personal", description: "Each episode is crafted specifically for your interests" }
@@ -85,8 +85,15 @@ export default function LandingPage() {
       </main>
 
       <footer className="bg-gray-100 py-8">
-        <div className="container mx-auto px-4 text-center text-sm text-gray-600">
-          © 2025 Lettercast. All rights reserved.
+        <div className="container mx-auto px-4 text-center">
+          <div className="text-sm text-gray-600">
+            © 2025 Lettercast. All rights reserved.
+          </div>
+          <div className="mt-2 space-x-4 text-sm">
+            <a href="mailto:mail@leonsandner.com" className="text-gray-600 hover:text-gray-900">Contact</a>
+            <a href="https://publyc.app/terms.html" className="text-gray-600 hover:text-gray-900">Terms</a>
+            <a href="https://publyc.app/privacy.html" className="text-gray-600 hover:text-gray-900">Privacy</a>
+          </div>
         </div>
       </footer>
     </div>
