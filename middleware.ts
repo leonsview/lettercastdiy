@@ -22,7 +22,7 @@ export default clerkMiddleware(async (auth, req) => {
     return NextResponse.next()
   }
 }, {
-  authorizedParties: ["https://www.lettercast.fyi", "https://lettercast.fyi"]
+  authorizedParties: ["https://www.lettercast.fyi", "https://lettercast.fyi", "http://localhost:3000"]
 })
 
 export const config = {
