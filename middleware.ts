@@ -21,6 +21,8 @@ export default clerkMiddleware(async (auth, req) => {
   if (userId && isProtectedRoute(req)) {
     return NextResponse.next()
   }
+}, {
+  authorizedParties: ["https://www.lettercast.fyi", "https://lettercast.fyi"]
 })
 
 export const config = {
