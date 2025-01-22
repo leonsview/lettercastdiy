@@ -26,12 +26,14 @@ export async function POST(req: Request) {
 
   try {
     if (!sig || !webhookSecret) {
+      console.error("Missing webhook secret or signature", { sig, webhookSecret })
       throw new Error("Webhook secret or signature missing")
     }
 
     event = stripe.webhooks.constructEvent(body, sig, webhookSecret)
+    console.log("Webhook event received:", event.type)
   } catch (err: any) {
-    console.error(`Webhook Error: ${err.message}`)
+    console.error(`Webhook Error: ${err.message}`, { sig, webhookSecret })
     return new Response(`Webhook Error: ${err.message}`, { status: 400 })
   }
 
@@ -40,10 +42,12 @@ export async function POST(req: Request) {
       switch (event.type) {
         case "customer.subscription.updated":
         case "customer.subscription.deleted":
+          console.log("Processing subscription change event")
           await handleSubscriptionChange(event)
           break
 
         case "checkout.session.completed":
+          console.log("Processing checkout completion event")
           await handleCheckoutSession(event)
           break
 
@@ -76,15 +80,24 @@ async function handleSubscriptionChange(event: Stripe.Event) {
 
 async function handleCheckoutSession(event: Stripe.Event) {
   const checkoutSession = event.data.object as Stripe.Checkout.Session
+  console.log("Checkout session data:", {
+    mode: checkoutSession.mode,
+    clientReferenceId: checkoutSession.client_reference_id,
+    customerId: checkoutSession.customer,
+    subscriptionId: checkoutSession.subscription
+  })
+
   if (checkoutSession.mode === "subscription") {
     const subscriptionId = checkoutSession.subscription as string
     const userId = checkoutSession.client_reference_id
     const customerId = checkoutSession.customer as string
 
     if (!userId) {
+      console.error("No userId found in checkout session")
       throw new Error("No userId found in checkout session")
     }
 
+    console.log("Updating stripe customer", { userId, subscriptionId, customerId })
     // Update the customer with their subscription info
     await updateStripeCustomer(
       userId,
@@ -95,6 +108,7 @@ async function handleCheckoutSession(event: Stripe.Event) {
     const subscription = await stripe.subscriptions.retrieve(subscriptionId)
     const productId = subscription.items.data[0].price.product as string
 
+    console.log("Managing subscription status", { subscriptionId, customerId, productId })
     // Update subscription status
     await manageSubscriptionStatusChange(
       subscription.id,

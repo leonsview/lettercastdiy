@@ -48,10 +48,19 @@ export const updateStripeCustomer = async (
 ) => {
   try {
     if (!userId || !subscriptionId || !customerId) {
+      console.error("Missing parameters", { userId, subscriptionId, customerId })
       throw new Error("Missing required parameters for updateStripeCustomer")
     }
 
+    console.log("Getting subscription details", { subscriptionId })
     const subscription = await getSubscription(subscriptionId)
+
+    console.log("Updating profile", { 
+      userId,
+      customerId,
+      subscriptionId: subscription.id,
+      status: "pro"
+    })
 
     // Always set to pro for active subscriptions from checkout
     const result = await updateProfileAction(userId, {
@@ -61,9 +70,11 @@ export const updateStripeCustomer = async (
     })
 
     if (!result.isSuccess) {
+      console.error("Failed to update profile", result)
       throw new Error("Failed to update customer profile")
     }
 
+    console.log("Successfully updated customer profile to pro")
     return result.data
   } catch (error) {
     console.error("Error in updateStripeCustomer:", error)
@@ -80,23 +91,34 @@ export const manageSubscriptionStatusChange = async (
 ): Promise<MembershipStatus> => {
   try {
     if (!subscriptionId || !customerId || !productId) {
+      console.error("Missing parameters", { subscriptionId, customerId, productId })
       throw new Error(
         "Missing required parameters for manageSubscriptionStatusChange"
       )
     }
 
+    console.log("Getting subscription details", { subscriptionId })
     const subscription = await getSubscription(subscriptionId)
+    
+    console.log("Getting product details", { productId })
     const product = await stripe.products.retrieve(productId)
     const membership = product.metadata.membership as MembershipStatus
 
     if (!["free", "pro"].includes(membership)) {
+      console.error("Invalid membership type", { membership })
       throw new Error(
         `Invalid membership type in product metadata: ${membership}`
       )
     }
 
     const membershipStatus = getMembershipStatus(subscription, membership)
+    console.log("Calculated membership status", { membershipStatus })
 
+    console.log("Updating profile by customer ID", { 
+      customerId,
+      subscriptionId: subscription.id,
+      membershipStatus
+    })
     const updateResult = await updateProfileByStripeCustomerIdAction(
       customerId,
       {
@@ -106,9 +128,11 @@ export const manageSubscriptionStatusChange = async (
     )
 
     if (!updateResult.isSuccess) {
+      console.error("Failed to update profile", updateResult)
       throw new Error("Failed to update subscription status")
     }
 
+    console.log("Successfully updated subscription status")
     return membershipStatus
   } catch (error) {
     console.error("Error in manageSubscriptionStatusChange:", error)
