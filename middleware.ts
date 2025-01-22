@@ -7,7 +7,7 @@ Contains middleware for protecting routes, checking user authentication, and red
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server"
 import { NextResponse } from "next/server"
 
-const isPublicRoute = createRouteMatcher(["/", "/login", "/subscribe"])
+const isPublicRoute = createRouteMatcher(["/", "/login", "/signup", "/subscribe"])
 
 export default clerkMiddleware(async (auth, req) => {
   const { userId } = await auth()
