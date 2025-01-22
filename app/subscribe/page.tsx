@@ -26,8 +26,8 @@ export default async function SubscribePage() {
   return (
     <div className="container mx-auto max-w-4xl py-12">
       <div className="mb-12 text-center max-w-2xl mx-auto">
-        <h1 className="mb-6 text-4xl font-bold">Subscribe to unlock the power of lettercast</h1>
-        <div className="text-xl leading-relaxed text-muted-foreground space-y-4">
+        <h1 className="mb-6 text-3xl font-bold">Everything you need to transform your newsletters into podcasts</h1>
+        <div className="text-lg leading-relaxed text-muted-foreground space-y-4">
           <p>
             Lettercast started as a fun side project I built for myself. After seeing how many people were interested in using it, I quickly added profiles and authentication to make it available for everyone.
           </p>
@@ -38,20 +38,17 @@ export default async function SubscribePage() {
       </div>
 
       <div className="grid gap-8">
-        <Card className="w-full">
-          <CardHeader>
-            <CardTitle className="text-2xl">Everything you need to transform your newsletters into podcasts</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="mb-6 text-4xl font-bold">€5/month</div>
-            <ul className="space-y-3 text-lg">
+        <Card className="w-full max-w-lg mx-auto">
+          <CardContent className="pt-6 pb-4">
+            <div className="mb-4 text-3xl font-bold">€5/month</div>
+            <ul className="space-y-2">
               <li>✓ Up to 15 newsletter subscriptions</li>
               <li>✓ Weekly personalized podcast episodes</li>
               <li>✓ WhatsApp delivery</li>
               <li>✓ Priority support</li>
             </ul>
           </CardContent>
-          <CardFooter className="flex flex-col space-y-4">
+          <CardFooter className="flex flex-col space-y-3 pt-0">
             <Link 
               href={stripePaymentLink}
               className="w-full"
@@ -60,7 +57,7 @@ export default async function SubscribePage() {
                 Subscribe Now
               </Button>
             </Link>
-            <div className="text-center text-sm text-muted-foreground">
+            <div className="text-center text-xs text-muted-foreground">
               Secure payment powered by Stripe
             </div>
           </CardFooter>
