@@ -19,25 +19,39 @@ const relevantEvents = new Set([
 ])
 
 export async function POST(req: Request) {
+  console.log("Webhook request received")
   const body = await req.text()
+  console.log("Request body:", body)
+  
   const sig = (await headers()).get("Stripe-Signature") as string
+  console.log("Stripe signature:", sig)
+  
   const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET
+  console.log("Webhook secret exists:", !!webhookSecret)
+  
   let event: Stripe.Event
 
   try {
     if (!sig || !webhookSecret) {
-      console.error("Missing webhook secret or signature", { sig, webhookSecret })
+      console.error("Missing webhook secret or signature", { 
+        hasSignature: !!sig,
+        hasWebhookSecret: !!webhookSecret 
+      })
       throw new Error("Webhook secret or signature missing")
     }
 
     event = stripe.webhooks.constructEvent(body, sig, webhookSecret)
-    console.log("Webhook event received:", {
+    console.log("Webhook event constructed successfully:", {
       type: event.type,
-      id: event.id,
-      data: JSON.stringify(event.data.object)
+      id: event.id
     })
   } catch (err: any) {
-    console.error(`Webhook Error: ${err.message}`, { sig, webhookSecret })
+    console.error("Webhook construction error:", {
+      message: err.message,
+      hasSignature: !!sig,
+      hasWebhookSecret: !!webhookSecret,
+      signatureStart: sig?.substring(0, 10)
+    })
     return new Response(`Webhook Error: ${err.message}`, { status: 400 })
   }
 
@@ -137,4 +151,4 @@ async function handleCheckoutSession(event: Stripe.Event) {
   }
 
   return new Response(JSON.stringify({ received: true }))
-}
+} 
