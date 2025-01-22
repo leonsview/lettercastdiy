@@ -68,7 +68,8 @@ export const updateStripeCustomer = async (
         stripeCustomerId: customerId,
         stripeSubscriptionId: subscription.id,
         membership: "pro",
-        whatsappNumber: "",
+        newsletters: [],
+        welcomeSent: false,
         createdAt: new Date(),
         updatedAt: new Date()
       })
