@@ -53,10 +53,11 @@ export const updateStripeCustomer = async (
 
     const subscription = await getSubscription(subscriptionId)
 
+    // Always set to pro for active subscriptions from checkout
     const result = await updateProfileAction(userId, {
       stripeCustomerId: customerId,
       stripeSubscriptionId: subscription.id,
-      membership: subscription.status === "active" ? "pro" : "free"
+      membership: "pro" // Force pro status on successful checkout
     })
 
     if (!result.isSuccess) {

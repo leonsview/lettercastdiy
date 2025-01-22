@@ -94,10 +94,8 @@ async function handleCheckoutSession(event: Stripe.Event) {
       subscription.customer as string,
       productId
     )
-
-    // Redirect to homepage after successful subscription
-    if (checkoutSession.success_url) {
-      return Response.redirect(checkoutSession.success_url)
-    }
   }
+
+  // Return success response - the redirect is handled by Stripe's success_url
+  return new Response(JSON.stringify({ received: true }))
 }
