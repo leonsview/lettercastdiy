@@ -31,7 +31,11 @@ export async function POST(req: Request) {
     }
 
     event = stripe.webhooks.constructEvent(body, sig, webhookSecret)
-    console.log("Webhook event received:", event.type)
+    console.log("Webhook event received:", {
+      type: event.type,
+      id: event.id,
+      data: JSON.stringify(event.data.object)
+    })
   } catch (err: any) {
     console.error(`Webhook Error: ${err.message}`, { sig, webhookSecret })
     return new Response(`Webhook Error: ${err.message}`, { status: 400 })
@@ -42,12 +46,18 @@ export async function POST(req: Request) {
       switch (event.type) {
         case "customer.subscription.updated":
         case "customer.subscription.deleted":
-          console.log("Processing subscription change event")
+          console.log("Processing subscription change event", {
+            type: event.type,
+            data: JSON.stringify(event.data.object)
+          })
           await handleSubscriptionChange(event)
           break
 
         case "checkout.session.completed":
-          console.log("Processing checkout completion event")
+          console.log("Processing checkout completion event", {
+            type: event.type,
+            data: JSON.stringify(event.data.object)
+          })
           await handleCheckoutSession(event)
           break
 
@@ -84,7 +94,9 @@ async function handleCheckoutSession(event: Stripe.Event) {
     mode: checkoutSession.mode,
     clientReferenceId: checkoutSession.client_reference_id,
     customerId: checkoutSession.customer,
-    subscriptionId: checkoutSession.subscription
+    subscriptionId: checkoutSession.subscription,
+    paymentStatus: checkoutSession.payment_status,
+    status: checkoutSession.status
   })
 
   if (checkoutSession.mode === "subscription") {
@@ -98,23 +110,30 @@ async function handleCheckoutSession(event: Stripe.Event) {
     }
 
     console.log("Updating stripe customer", { userId, subscriptionId, customerId })
-    // Update the customer with their subscription info
-    await updateStripeCustomer(
-      userId,
-      subscriptionId,
-      customerId
-    )
+    try {
+      // Update the customer with their subscription info
+      const customerUpdateResult = await updateStripeCustomer(
+        userId,
+        subscriptionId,
+        customerId
+      )
+      console.log("Customer update result:", customerUpdateResult)
 
-    const subscription = await stripe.subscriptions.retrieve(subscriptionId)
-    const productId = subscription.items.data[0].price.product as string
+      const subscription = await stripe.subscriptions.retrieve(subscriptionId)
+      const productId = subscription.items.data[0].price.product as string
 
-    console.log("Managing subscription status", { subscriptionId, customerId, productId })
-    // Update subscription status
-    await manageSubscriptionStatusChange(
-      subscription.id,
-      customerId,
-      productId
-    )
+      console.log("Managing subscription status", { subscriptionId, customerId, productId })
+      // Update subscription status
+      const statusUpdateResult = await manageSubscriptionStatusChange(
+        subscription.id,
+        customerId,
+        productId
+      )
+      console.log("Status update result:", statusUpdateResult)
+    } catch (error) {
+      console.error("Error in handleCheckoutSession:", error)
+      throw error
+    }
   }
 
   return new Response(JSON.stringify({ received: true }))

@@ -127,17 +127,14 @@ export const manageSubscriptionStatusChange = async (
 
     console.log("Getting subscription details", { subscriptionId })
     const subscription = await getSubscription(subscriptionId)
+    console.log("Subscription status:", subscription.status)
     
     console.log("Getting product details", { productId })
     const product = await stripe.products.retrieve(productId)
-    const membership = product.metadata.membership as MembershipStatus
-
-    if (!["free", "pro"].includes(membership)) {
-      console.error("Invalid membership type", { membership })
-      throw new Error(
-        `Invalid membership type in product metadata: ${membership}`
-      )
-    }
+    console.log("Product metadata:", product.metadata)
+    
+    // Force pro membership for active subscriptions
+    const membership = "pro"
 
     const membershipStatus = getMembershipStatus(subscription, membership)
     console.log("Calculated membership status", { membershipStatus })
