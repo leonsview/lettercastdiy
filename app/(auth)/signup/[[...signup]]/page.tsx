@@ -16,6 +16,7 @@ export default function SignUpPage() {
   return (
     <SignUp
       appearance={{ baseTheme: theme === "dark" ? dark : undefined }}
+      afterSignUpUrl="/subscribe"
     />
   )
 }

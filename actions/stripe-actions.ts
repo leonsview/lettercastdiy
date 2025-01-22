@@ -15,23 +15,24 @@ import Stripe from "stripe"
 type MembershipStatus = SelectProfile["membership"]
 
 const getMembershipStatus = (
-  status: Stripe.Subscription.Status,
+  subscription: Stripe.Subscription,
   membership: MembershipStatus
 ): MembershipStatus => {
-  switch (status) {
-    case "active":
-    case "trialing":
-      return membership
-    case "canceled":
-    case "incomplete":
-    case "incomplete_expired":
-    case "past_due":
-    case "paused":
-    case "unpaid":
-      return "free"
-    default:
-      return "free"
+  const now = new Date()
+  const periodEnd = new Date(subscription.current_period_end * 1000)
+
+  // If subscription is active, set to pro
+  if (subscription.status === "active") {
+    return "pro"
   }
+
+  // If subscription is canceled but still in active period
+  if (subscription.cancel_at_period_end && now < periodEnd) {
+    return "pro" // Keep pro until period ends
+  }
+
+  // For all other cases, revert to free
+  return "free"
 }
 
 const getSubscription = async (subscriptionId: string) => {
@@ -54,7 +55,8 @@ export const updateStripeCustomer = async (
 
     const result = await updateProfileAction(userId, {
       stripeCustomerId: customerId,
-      stripeSubscriptionId: subscription.id
+      stripeSubscriptionId: subscription.id,
+      membership: subscription.status === "active" ? "pro" : "free"
     })
 
     if (!result.isSuccess) {
@@ -92,10 +94,7 @@ export const manageSubscriptionStatusChange = async (
       )
     }
 
-    const membershipStatus = getMembershipStatus(
-      subscription.status,
-      membership
-    )
+    const membershipStatus = getMembershipStatus(subscription, membership)
 
     const updateResult = await updateProfileByStripeCustomerIdAction(
       customerId,

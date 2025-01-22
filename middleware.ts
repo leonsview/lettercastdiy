@@ -7,24 +7,19 @@ Contains middleware for protecting routes, checking user authentication, and red
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server"
 import { NextResponse } from "next/server"
 
-const isProtectedRoute = createRouteMatcher(["/profile(.*)"])
+const isPublicRoute = createRouteMatcher(["/", "/login", "/subscribe"])
 
 export default clerkMiddleware(async (auth, req) => {
-  const { userId, redirectToSignIn } = await auth()
-
-  // If the user isn't signed in and the route is private, redirect to sign-in
-  if (!userId && isProtectedRoute(req)) {
-    return redirectToSignIn({ returnBackUrl: "/login" })
+  const { userId } = await auth()
+  
+  if (!userId && !isPublicRoute(req)) {
+    const loginUrl = new URL("/login", req.url)
+    return NextResponse.redirect(loginUrl)
   }
 
-  // If the user is logged in and the route is protected, let them view.
-  if (userId && isProtectedRoute(req)) {
-    return NextResponse.next()
-  }
-}, {
-  authorizedParties: ["https://www.lettercast.fyi", "https://lettercast.fyi", "http://localhost:3000"]
+  return NextResponse.next()
 })
 
 export const config = {
-  matcher: ["/((?!.*\\..*|_next).*)", "/", "/(api|trpc)(.*)"]
+  matcher: ["/((?!.+\\.[\\w]+$|_next).*)", "/", "/(api|trpc)(.*)"]
 }
