@@ -5,8 +5,10 @@ Contains server actions related to Stripe.
 */
 
 import {
+  createProfileAction,
   updateProfileAction,
-  updateProfileByStripeCustomerIdAction
+  updateProfileByStripeCustomerIdAction,
+  getProfileAction
 } from "@/actions/db/profiles-actions"
 import { SelectProfile } from "@/db/schema"
 import { stripe } from "@/lib/stripe"
@@ -55,14 +57,39 @@ export const updateStripeCustomer = async (
     console.log("Getting subscription details", { subscriptionId })
     const subscription = await getSubscription(subscriptionId)
 
-    console.log("Updating profile", { 
+    console.log("Checking if profile exists")
+    const existingProfile = await getProfileAction(userId)
+
+    if (!existingProfile.isSuccess || !existingProfile.data) {
+      console.log("Creating new profile", { userId })
+      // Create new profile
+      const createResult = await createProfileAction({
+        userId,
+        stripeCustomerId: customerId,
+        stripeSubscriptionId: subscription.id,
+        membership: "pro",
+        whatsappNumber: "",
+        createdAt: new Date(),
+        updatedAt: new Date()
+      })
+
+      if (!createResult.isSuccess) {
+        console.error("Failed to create profile", createResult)
+        throw new Error("Failed to create customer profile")
+      }
+
+      console.log("Successfully created profile with pro status")
+      return createResult.data
+    }
+
+    console.log("Updating existing profile", { 
       userId,
       customerId,
       subscriptionId: subscription.id,
       status: "pro"
     })
 
-    // Always set to pro for active subscriptions from checkout
+    // Update existing profile
     const result = await updateProfileAction(userId, {
       stripeCustomerId: customerId,
       stripeSubscriptionId: subscription.id,
