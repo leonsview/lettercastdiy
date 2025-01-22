@@ -12,6 +12,13 @@ import { stripe } from "@/lib/stripe"
 import { headers } from "next/headers"
 import Stripe from "stripe"
 
+// This is needed to disable body parsing, as we need the raw body for Stripe signature verification
+export const config = {
+  api: {
+    bodyParser: false
+  }
+}
+
 const relevantEvents = new Set([
   "checkout.session.completed",
   "customer.subscription.updated",
@@ -20,76 +27,65 @@ const relevantEvents = new Set([
 
 export async function POST(req: Request) {
   console.log("Webhook request received")
+  
+  // Get the raw body and headers
   const body = await req.text()
-  console.log("Request body:", body)
-  
-  const sig = (await headers()).get("Stripe-Signature") as string
-  console.log("Stripe signature:", sig)
-  
+  const signature = req.headers.get("stripe-signature")
   const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET
-  console.log("Webhook secret exists:", !!webhookSecret)
   
-  let event: Stripe.Event
+  console.log("Request headers:", {
+    signature: signature?.substring(0, 20),
+    hasSecret: !!webhookSecret
+  })
+
+  if (!signature || !webhookSecret) {
+    console.error("Missing webhook secret or signature")
+    return new Response(
+      JSON.stringify({ error: "Missing webhook secret or signature" }), 
+      { status: 400 }
+    )
+  }
 
   try {
-    if (!sig || !webhookSecret) {
-      console.error("Missing webhook secret or signature", { 
-        hasSignature: !!sig,
-        hasWebhookSecret: !!webhookSecret 
-      })
-      throw new Error("Webhook secret or signature missing")
-    }
+    const event = stripe.webhooks.constructEvent(body, signature, webhookSecret)
+    console.log("Event constructed successfully:", event.type)
 
-    event = stripe.webhooks.constructEvent(body, sig, webhookSecret)
-    console.log("Webhook event constructed successfully:", {
-      type: event.type,
-      id: event.id
-    })
-  } catch (err: any) {
-    console.error("Webhook construction error:", {
-      message: err.message,
-      hasSignature: !!sig,
-      hasWebhookSecret: !!webhookSecret,
-      signatureStart: sig?.substring(0, 10)
-    })
-    return new Response(`Webhook Error: ${err.message}`, { status: 400 })
-  }
+    if (relevantEvents.has(event.type)) {
+      try {
+        switch (event.type) {
+          case "customer.subscription.updated":
+          case "customer.subscription.deleted":
+            console.log("Processing subscription change")
+            await handleSubscriptionChange(event)
+            break
 
-  if (relevantEvents.has(event.type)) {
-    try {
-      switch (event.type) {
-        case "customer.subscription.updated":
-        case "customer.subscription.deleted":
-          console.log("Processing subscription change event", {
-            type: event.type,
-            data: JSON.stringify(event.data.object)
-          })
-          await handleSubscriptionChange(event)
-          break
-
-        case "checkout.session.completed":
-          console.log("Processing checkout completion event", {
-            type: event.type,
-            data: JSON.stringify(event.data.object)
-          })
-          await handleCheckoutSession(event)
-          break
-
-        default:
-          throw new Error("Unhandled relevant event!")
-      }
-    } catch (error) {
-      console.error("Webhook handler failed:", error)
-      return new Response(
-        "Webhook handler failed. View your nextjs function logs.",
-        {
-          status: 400
+          case "checkout.session.completed":
+            console.log("Processing checkout completion")
+            await handleCheckoutSession(event)
+            break
         }
-      )
+      } catch (error) {
+        console.error("Error processing webhook:", error)
+        return new Response(
+          JSON.stringify({ error: "Webhook processing failed" }), 
+          { status: 400 }
+        )
+      }
     }
-  }
 
-  return new Response(JSON.stringify({ received: true }))
+    return new Response(JSON.stringify({ received: true }), {
+      status: 200,
+      headers: {
+        "Content-Type": "application/json"
+      }
+    })
+  } catch (err) {
+    console.error("Webhook signature verification failed:", err)
+    return new Response(
+      JSON.stringify({ error: "Webhook signature verification failed" }), 
+      { status: 400 }
+    )
+  }
 }
 
 async function handleSubscriptionChange(event: Stripe.Event) {
