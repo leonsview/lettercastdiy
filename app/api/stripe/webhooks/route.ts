@@ -78,24 +78,30 @@ async function handleCheckoutSession(event: Stripe.Event) {
   const checkoutSession = event.data.object as Stripe.Checkout.Session
   if (checkoutSession.mode === "subscription") {
     const subscriptionId = checkoutSession.subscription as string
+    const userId = checkoutSession.client_reference_id
+    const customerId = checkoutSession.customer as string
+
+    if (!userId) {
+      throw new Error("No userId found in checkout session")
+    }
+
+    // Update the customer with their subscription info
     await updateStripeCustomer(
-      checkoutSession.client_reference_id as string,
+      userId,
       subscriptionId,
-      checkoutSession.customer as string
+      customerId
     )
 
-    const subscription = await stripe.subscriptions.retrieve(subscriptionId, {
-      expand: ["default_payment_method"]
-    })
-
+    const subscription = await stripe.subscriptions.retrieve(subscriptionId)
     const productId = subscription.items.data[0].price.product as string
+
+    // Update subscription status
     await manageSubscriptionStatusChange(
       subscription.id,
-      subscription.customer as string,
+      customerId,
       productId
     )
   }
 
-  // Return success response - the redirect is handled by Stripe's success_url
   return new Response(JSON.stringify({ received: true }))
 }

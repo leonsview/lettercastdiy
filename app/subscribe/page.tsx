@@ -1,27 +1,55 @@
-"use server"
+"use client"
 
 import { Button } from "@/components/ui/button"
 import {
   Card,
   CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle
+  CardFooter
 } from "@/components/ui/card"
-import { auth } from "@clerk/nextjs/server"
-import { redirect } from "next/navigation"
 import { Github } from "lucide-react"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
+import { useState } from "react"
+import { toast } from "sonner"
 
-export default async function SubscribePage() {
-  const { userId } = await auth()
-  if (!userId) redirect("/login")
+export default function SubscribePage() {
+  const router = useRouter()
+  const [loading, setLoading] = useState(false)
 
-  // Construct the success URL
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
-  const successUrl = `${baseUrl}/`
-  const stripePaymentLink = `${process.env.NEXT_PUBLIC_STRIPE_PAYMENT_LINK_MONTHLY}?client_reference_id=${userId}&success_url=${encodeURIComponent(successUrl)}`
+  const onSubscribe = async () => {
+    try {
+      setLoading(true)
+      const response = await fetch("/api/stripe/create-checkout", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      })
+
+      if (!response.ok) {
+        const error = await response.text()
+        throw new Error(error)
+      }
+
+      const data = await response.json()
+
+      if (!data.url) {
+        throw new Error("No checkout URL returned")
+      }
+
+      // Redirect to Stripe Checkout
+      window.location.href = data.url
+    } catch (error) {
+      console.error("Error:", error)
+      toast.error(
+        error instanceof Error 
+          ? error.message 
+          : "Failed to start checkout process"
+      )
+    } finally {
+      setLoading(false)
+    }
+  }
 
   return (
     <div className="container mx-auto max-w-4xl py-12">
@@ -49,14 +77,13 @@ export default async function SubscribePage() {
             </ul>
           </CardContent>
           <CardFooter className="flex flex-col space-y-3 pt-0">
-            <Link 
-              href={stripePaymentLink}
-              className="w-full"
+            <Button 
+              onClick={onSubscribe}
+              disabled={loading}
+              className="w-full bg-blue-500 hover:bg-blue-600"
             >
-              <Button className="w-full bg-blue-500 hover:bg-blue-600">
-                Subscribe Now
-              </Button>
-            </Link>
+              {loading ? "Loading..." : "Subscribe Now"}
+            </Button>
             <div className="text-center text-xs text-muted-foreground">
               Secure payment powered by Stripe
             </div>
