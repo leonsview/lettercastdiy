@@ -11,17 +11,21 @@ import { CreditCard } from "lucide-react"
 import { stripe } from "@/lib/stripe"
 import { updateStripeCustomer, manageSubscriptionStatusChange } from "@/actions/stripe-actions"
 
-interface Props {
-  searchParams: { [key: string]: string | string[] | undefined }
+interface SearchParams {
+  session_id?: string
 }
 
-export default async function ProfilePage({ searchParams }: Props) {
+export default async function ProfilePage({
+  searchParams
+}: {
+  searchParams: SearchParams
+}) {
   const { userId } = await auth()
   if (!userId) redirect("/login")
 
   // Handle checkout session verification
   const sessionId = searchParams.session_id
-  if (sessionId && typeof sessionId === "string") {
+  if (sessionId) {
     try {
       const session = await stripe.checkout.sessions.retrieve(sessionId)
       if (session.payment_status === "paid") {
