@@ -32,7 +32,7 @@ import {
 } from "@/components/ui/alert-dialog"
 
 interface ProfileFormProps {
-  userId: string
+  userId?: string
   initialData?: SelectProfile
 }
 
@@ -43,7 +43,7 @@ interface FormValues {
   newsletter: string
 }
 
-export default function ProfileForm({ userId, initialData }: ProfileFormProps) {
+export default function ProfileForm({ userId = "default", initialData }: ProfileFormProps) {
   const [isPending, startTransition] = useTransition()
   const [newsletters, setNewsletters] = useState<string[]>(initialData?.newsletters || [])
 
@@ -87,6 +87,12 @@ export default function ProfileForm({ userId, initialData }: ProfileFormProps) {
           .split(",")
           .map(email => email.trim())
           .filter(email => email.length > 0)
+
+        // Check if adding new newsletters would exceed the limit
+        if (newsletters.length + newsletterEmails.length > 15) {
+          toast.error("You can only add up to 15 newsletters")
+          return
+        }
 
         const newNewsletters: string[] = []
 
@@ -219,6 +225,9 @@ export default function ProfileForm({ userId, initialData }: ProfileFormProps) {
 
         <div className="space-y-2">
           <h3 className="font-medium">Your Newsletters</h3>
+          <div className="text-sm text-muted-foreground mb-2">
+            {newsletters.length}/15 newsletters used ({15 - newsletters.length} remaining)
+          </div>
           <div className="space-y-1">
             {newsletters.map((newsletter, index) => (
               <div key={index} className="flex items-center justify-between group">

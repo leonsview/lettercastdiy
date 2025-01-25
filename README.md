@@ -2,13 +2,13 @@
 
 Transform your newsletters into personalized podcasts delivered via WhatsApp.
 
-We started building this project with the start of the hackathon completely from scratch.
+Feel free to use this repo as a starting point for your own version. 
 
-try it yourself at: www.lettercast.fyi
+Otherwise, you can try it yourself at: www.lettercast.fyi
 
 ## Overview
 
-Lettercast is a modern web application that converts newsletter content into audio format, making it easier to consume information on the go. Get the insights you love, delivered as a weekly AI-powered podcast episode right to your WhatsApp.
+This is a modern web application that converts newsletter content into audio format, making it easier to consume information on the go. Get the insights you love, delivered as a weekly AI-powered podcast episode right to your WhatsApp.
 
 ## Features
 
@@ -34,36 +34,50 @@ Lettercast is a modern web application that converts newsletter content into aud
 - Drizzle ORM
 - Server Actions
 
-### Authentication
-- Clerk
-
-### Payments
-- Stripe
+### Analytics
+- PostHog
 
 ### Deployment
 - Vercel
 
-## Project Structure
+## How to Do It Yourself
 
+1. Clone this repository
+2. Create a `.env.local` file with the following variables:
+
+```env
+# DB
+DATABASE_URL=your_database_url
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key
+
+# AutoContent
+AUTOCONTENT_API_KEY=your_autocontent_api_key
+
+# Green-API (WhatsApp)
+NEXT_PUBLIC_GREEN_API_URL=your_green_api_url
+GREEN_API_INSTANCE_ID=your_instance_id
+GREEN_API_TOKEN=your_green_api_token
 ```
-lettercast/
-├── actions/           # Server actions
-│   └── db/           # Database related actions
-├── app/              # Next.js app router
-│   ├── api/          # API routes
-│   └── route/        # Route components
-├── components/       # Shared components
-│   ├── ui/          # UI components
-│   └── utilities/   # Utility components
-├── db/              # Database
-│   └── schema/      # Database schemas
-├── lib/             # Library code
-│   └── hooks/       # Custom hooks
-├── prompts/         # Prompt files
-├── public/          # Static assets
-└── types/           # Type definitions
+
+3. Set up email scraping:
+   - For Gmail: Enable Gmail API in Google Cloud Console
+   - Create OAuth 2.0 credentials
+   - Get refresh token using OAuth 2.0 playground
+   - Other email providers: Implement your own email fetching logic
+
+4. Configure podcast generation frequency & logic
+   - Use a cron service (like Vercel Cron) to trigger the generation
+
+5. Run the development server:
+```bash
+npm install
+npm run dev
 ```
 
+Your instance will now:
+- Fetch newsletters from your email
+- Generate audio content weekly
+- Deliver podcasts via WhatsApp
 
-Our tool is 95% complete. 
-The only thing that is not fully working yet is the automatic email scraping but we already have a first draft for it (see the branch: feat/mailscraping), using the Gmail API it just needs a bit more testing to be reliable.
