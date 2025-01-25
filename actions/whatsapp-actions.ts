@@ -8,9 +8,13 @@ This file contains server actions for WhatsApp functionality.
 
 import { checkWhatsAppNumber, sendWhatsAppMessage, sendWhatsAppFile } from "@/lib/green-api"
 import { ActionState } from "@/types"
+import { db } from "@/db/db"
+import { profilesTable } from "@/db/schema"
+import { eq } from "drizzle-orm"
 
 export async function sendWhatsAppWelcomeAction(
-  phoneNumber: string
+  phoneNumber: string,
+  userId: string
 ): Promise<ActionState<void>> {
   try {
     // First check if the phone number is on WhatsApp
@@ -40,7 +44,7 @@ export async function sendWhatsAppWelcomeAction(
     // Send the audio file
     const audioMessage = await sendWhatsAppFile(
       phoneNumber,
-      "https://uvctvecbobqepkqrcshc.supabase.co/storage/v1/object/public/Podcast%20Audio%20Files/Mindful-Media-Consumption-lettercast.opus?t=2025-01-25T15%3A04%3A55.487Z",
+      "https://uvctvecbobqepkqrcshc.supabase.co/storage/v1/object/public/Podcast%20Audio%20Files/Mindful%20Media%20Consumption%20lettercast.mp3?t=2025-01-25T15%3A12%3A43.444Z",
       ""
     )
 
@@ -55,7 +59,7 @@ export async function sendWhatsAppWelcomeAction(
     // Send final message
     const finalMessage = await sendWhatsAppMessage(
       phoneNumber,
-      "You will hear from us in a week!\nIn the meantime: if you have questions / feedback / suggestions, feel free to just text us in this WhatsApp chat."
+      "You will hear from us in a week!\n\nIf you any have questions / feedback / suggestions, feel free to just text us in this WhatsApp chat."
     )
 
     if (!finalMessage) {
@@ -65,6 +69,14 @@ export async function sendWhatsAppWelcomeAction(
         data: undefined
       }
     }
+
+    // Update profile to mark welcome message as sent
+    await db.update(profilesTable)
+      .set({ 
+        welcomeSent: true,
+        lastWelcomedPhone: phoneNumber 
+      })
+      .where(eq(profilesTable.userId, userId))
 
     return {
       isSuccess: true,
