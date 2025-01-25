@@ -17,7 +17,33 @@ export async function sendWhatsAppWelcomeAction(
   userId: string
 ): Promise<ActionState<void>> {
   try {
-    // First check if the phone number is on WhatsApp
+    // First check if we should send the welcome message
+    const [profile] = await db
+      .select()
+      .from(profilesTable)
+      .where(eq(profilesTable.userId, userId))
+      .limit(1)
+
+    if (!profile) {
+      return {
+        isSuccess: false,
+        message: "Profile not found",
+        data: undefined
+      }
+    }
+
+    // Only send welcome if:
+    // 1. Welcome was never sent (welcomeSent is false) OR
+    // 2. This is a new phone number (different from lastWelcomedPhone)
+    if (profile.welcomeSent && profile.lastWelcomedPhone === phoneNumber) {
+      return {
+        isSuccess: true,
+        message: "Welcome message already sent to this number",
+        data: undefined
+      }
+    }
+
+    // Check if the phone number is on WhatsApp
     const exists = await checkWhatsAppNumber(phoneNumber)
     if (!exists) {
       return {
