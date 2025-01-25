@@ -1,8 +1,10 @@
 "use client"
 
 import { Button } from "@/components/ui/button"
-import { ArrowRight, Headphones, Clock, Inbox, Zap } from 'lucide-react'
+import { ArrowRight, Headphones, Clock, Inbox, Zap, Github } from 'lucide-react'
 import Link from "next/link"
+import NewsletterToPodcast from "./landingpage-example/newsletter-to-podcast"
+import { Card, CardContent, CardFooter } from "@/components/ui/card"
 
 export default function LandingPage() {
   return (
@@ -42,6 +44,67 @@ export default function LandingPage() {
                   <p>{step.description}</p>
                 </div>
               ))}
+            </div>
+
+            <div className="mt-16">
+              <div className="w-full max-w-2xl mx-auto mb-16 border-t border-gray-200" />
+              <h3 className="text-2xl font-semibold text-center mb-8">See It In Action</h3>
+              <NewsletterToPodcast />
+            </div>
+          </div>
+        </section>
+
+        <section className="bg-white py-20">
+          <div className="container mx-auto px-4">
+            <div className="mb-12 text-center max-w-2xl mx-auto">
+              <h2 className="text-3xl font-bold mb-6">Everything you need to transform your newsletters into podcasts</h2>
+              <div className="text-lg text-muted-foreground space-y-4">
+                <p>
+                  Lettercast started as a fun side project I built for myself. After seeing how many people were interested in using it, I quickly added profiles and authentication to make it available for everyone.
+                </p>
+                <p>
+                  To cover the running costs, there's a €5 monthly subscription. Feel free to use it yourself! Happy to keep adding features based on your feedback.
+                </p>
+              </div>
+            </div>
+
+            <div className="grid gap-8">
+              <Card className="w-full max-w-lg mx-auto">
+                <CardContent className="pt-6 pb-4">
+                  <div className="mb-4 text-3xl font-bold">€5/month</div>
+                  <ul className="space-y-2">
+                    <li>✓ Up to 15 newsletter subscriptions</li>
+                    <li>✓ Weekly personalized podcast episodes</li>
+                    <li>✓ WhatsApp delivery</li>
+                    <li>✓ Priority support</li>
+                  </ul>
+                </CardContent>
+                <CardFooter className="flex flex-col space-y-3 pt-0">
+                  <Link href="/signup" className="w-full">
+                    <Button className="w-full bg-blue-500 hover:bg-blue-600">
+                      Get Started
+                      <ArrowRight className="ml-2" />
+                    </Button>
+                  </Link>
+                </CardFooter>
+              </Card>
+
+              <div className="text-center">
+                <p className="mb-4 text-muted-foreground">
+                  Want to run it yourself? (probably more expensive)<br />
+                  Check out the repository:
+                </p>
+                <Link 
+                  href="https://github.com/leonsandner/lettercast"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <Button variant="outline">
+                    <Github className="mr-2 h-4 w-4" />
+                    View on GitHub
+                  </Button>
+                </Link>
+              </div>
             </div>
           </div>
         </section>
