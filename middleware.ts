@@ -10,6 +10,11 @@ import { NextResponse } from "next/server"
 const isPublicRoute = createRouteMatcher(["/", "/login(.*)", "/signup(.*)", "/subscribe"])
 
 export default clerkMiddleware(async (auth, req) => {
+  // Skip auth for webhook
+  if (req.url.includes("/api/stripe/webhook")) {
+    return NextResponse.next()
+  }
+
   const { userId } = await auth()
   
   if (!userId && !isPublicRoute(req)) {
