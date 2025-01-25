@@ -17,6 +17,18 @@ import { SelectProfile } from "@/db/schema"
 import { updateProfileAction } from "@/actions/db/profiles-actions"
 import { checkNewsletterExistsAction, createNewsletterAction } from "@/actions/db/newsletters-actions"
 import { sendWhatsAppWelcomeAction } from "@/actions/whatsapp-actions"
+import { X } from "lucide-react"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger
+} from "@/components/ui/alert-dialog"
 
 interface ProfileFormProps {
   userId: string
@@ -138,6 +150,22 @@ export default function ProfileForm({ userId, initialData }: ProfileFormProps) {
     }
   }
 
+  async function handleDeleteNewsletter(newsletterToDelete: string) {
+    startTransition(async () => {
+      const updatedNewsletters = newsletters.filter(n => n !== newsletterToDelete)
+      const { isSuccess, message } = await updateProfileAction(userId, {
+        newsletters: updatedNewsletters
+      })
+
+      if (isSuccess) {
+        setNewsletters(updatedNewsletters)
+        toast.success("Newsletter removed successfully")
+      } else {
+        toast.error(message)
+      }
+    })
+  }
+
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -201,8 +229,35 @@ export default function ProfileForm({ userId, initialData }: ProfileFormProps) {
           <h3 className="font-medium">Your Newsletters</h3>
           <div className="space-y-1">
             {newsletters.map((newsletter, index) => (
-              <div key={index} className="text-sm text-muted-foreground">
-                {newsletter}
+              <div key={index} className="flex items-center justify-between group">
+                <span className="text-sm text-muted-foreground">{newsletter}</span>
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        This will remove {newsletter} from your newsletters.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogAction
+                        onClick={() => handleDeleteNewsletter(newsletter)}
+                      >
+                        Delete
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
               </div>
             ))}
           </div>
