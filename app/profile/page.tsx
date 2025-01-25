@@ -8,41 +8,10 @@ import { SignOutButton } from "@clerk/nextjs"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { CreditCard } from "lucide-react"
-import { stripe } from "@/lib/stripe"
-import { updateStripeCustomer, manageSubscriptionStatusChange } from "@/actions/stripe-actions"
 
-interface SearchParams {
-  session_id?: string
-}
-
-export default async function ProfilePage({
-  searchParams
-}: {
-  searchParams: SearchParams
-}) {
+export default async function ProfilePage() {
   const { userId } = await auth()
   if (!userId) redirect("/login")
-
-  // Handle checkout session verification
-  const sessionId = searchParams.session_id
-  if (sessionId) {
-    try {
-      const session = await stripe.checkout.sessions.retrieve(sessionId)
-      if (session.payment_status === "paid") {
-        const subscriptionId = session.subscription as string
-        const customerId = session.customer as string
-        
-        // Update customer and subscription status
-        await updateStripeCustomer(userId, subscriptionId, customerId)
-        
-        const subscription = await stripe.subscriptions.retrieve(subscriptionId)
-        const productId = subscription.items.data[0].price.product as string
-        await manageSubscriptionStatusChange(subscriptionId, customerId, productId)
-      }
-    } catch (error) {
-      console.error("Error verifying session:", error)
-    }
-  }
 
   const { data: profile } = await getProfileAction(userId as string)
   

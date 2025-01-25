@@ -120,7 +120,8 @@ async function handleCheckoutSession(event: Stripe.Event) {
     status: checkoutSession.status
   })
 
-  if (checkoutSession.mode === "subscription") {
+  // Only process paid subscription checkouts
+  if (checkoutSession.mode === "subscription" && checkoutSession.payment_status === "paid") {
     const subscriptionId = checkoutSession.subscription as string
     const userId = checkoutSession.client_reference_id
     const customerId = checkoutSession.customer as string
@@ -130,7 +131,13 @@ async function handleCheckoutSession(event: Stripe.Event) {
       throw new Error("No userId found in checkout session")
     }
 
-    console.log("Updating stripe customer", { userId, subscriptionId, customerId })
+    console.log("Processing paid subscription checkout", { 
+      userId, 
+      subscriptionId, 
+      customerId,
+      paymentStatus: checkoutSession.payment_status 
+    })
+
     try {
       // Update the customer with their subscription info
       const customerUpdateResult = await updateStripeCustomer(
@@ -141,6 +148,12 @@ async function handleCheckoutSession(event: Stripe.Event) {
       console.log("Customer update result:", customerUpdateResult)
 
       const subscription = await stripe.subscriptions.retrieve(subscriptionId)
+      console.log("Retrieved subscription:", {
+        status: subscription.status,
+        currentPeriodEnd: subscription.current_period_end,
+        cancelAtPeriodEnd: subscription.cancel_at_period_end
+      })
+
       const productId = subscription.items.data[0].price.product as string
 
       console.log("Managing subscription status", { subscriptionId, customerId, productId })
@@ -155,5 +168,10 @@ async function handleCheckoutSession(event: Stripe.Event) {
       console.error("Error in handleCheckoutSession:", error)
       throw error
     }
+  } else {
+    console.log("Skipping checkout session:", {
+      mode: checkoutSession.mode,
+      paymentStatus: checkoutSession.payment_status
+    })
   }
 } 
