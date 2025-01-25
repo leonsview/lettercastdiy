@@ -23,30 +23,59 @@ export async function sendWhatsAppWelcomeAction(
       }
     }
 
-    // Send welcome message
-    const sent = await sendWhatsAppMessage(
+    // Send welcome messages in sequence
+    const welcomeMessage = await sendWhatsAppMessage(
       phoneNumber,
-      "Welcome to Lettercast!"
+      "Welcome to lettercast! \nThanks for signing up :)\n\nYou will receive your first personalized lettercast in one week based on the newsletters you saved in your profile. \n\nIn the meantime, here is an episode for you about the topic of content curation (the very idea that lettercast emerged from)."
     )
 
-    if (!sent) {
+    if (!welcomeMessage) {
       return {
         isSuccess: false,
-        message: "Failed to send WhatsApp message",
+        message: "Failed to send welcome message",
+        data: undefined
+      }
+    }
+
+    // Send the audio file
+    const audioMessage = await sendWhatsAppFile(
+      phoneNumber,
+      "https://uvctvecbobqepkqrcshc.supabase.co/storage/v1/object/public/Podcast%20Audio%20Files/Mindful-Media-Consumption-lettercast.opus?t=2025-01-25T15%3A04%3A55.487Z",
+      ""
+    )
+
+    if (!audioMessage) {
+      return {
+        isSuccess: false,
+        message: "Failed to send audio message",
+        data: undefined
+      }
+    }
+
+    // Send final message
+    const finalMessage = await sendWhatsAppMessage(
+      phoneNumber,
+      "You will hear from us in a week!\nIn the meantime: if you have questions / feedback / suggestions, feel free to just text us in this WhatsApp chat."
+    )
+
+    if (!finalMessage) {
+      return {
+        isSuccess: false,
+        message: "Failed to send final message",
         data: undefined
       }
     }
 
     return {
       isSuccess: true,
-      message: "WhatsApp welcome message sent successfully",
+      message: "WhatsApp welcome messages sent successfully",
       data: undefined
     }
   } catch (error) {
-    console.error("Error sending WhatsApp welcome message:", error)
+    console.error("Error sending WhatsApp welcome messages:", error)
     return {
       isSuccess: false,
-      message: "Failed to send WhatsApp welcome message",
+      message: "Failed to send WhatsApp welcome messages",
       data: undefined
     }
   }
