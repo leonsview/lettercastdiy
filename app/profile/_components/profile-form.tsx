@@ -10,7 +10,8 @@ import {
   FormField,
   FormItem,
   FormLabel,
-  FormMessage
+  FormMessage,
+  FormDescription
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { SelectProfile } from "@/db/schema"
@@ -45,7 +46,6 @@ interface FormValues {
 export default function ProfileForm({ userId, initialData }: ProfileFormProps) {
   const [isPending, startTransition] = useTransition()
   const [newsletters, setNewsletters] = useState<string[]>(initialData?.newsletters || [])
-  const [isTestingWhatsApp, setIsTestingWhatsApp] = useState(false)
 
   const form = useForm<FormValues>({
     defaultValues: {
@@ -132,24 +132,6 @@ export default function ProfileForm({ userId, initialData }: ProfileFormProps) {
     })
   }
 
-  async function handleTestWhatsApp() {
-    setIsTestingWhatsApp(true)
-    try {
-      const response = await fetch("/api/test-whatsapp")
-      const data = await response.json()
-      
-      if (data.success) {
-        toast.success("Test WhatsApp message sent successfully!")
-      } else {
-        toast.error(data.error || "Failed to send test WhatsApp message")
-      }
-    } catch (error) {
-      toast.error("Failed to send test WhatsApp message")
-    } finally {
-      setIsTestingWhatsApp(false)
-    }
-  }
-
   async function handleDeleteNewsletter(newsletterToDelete: string) {
     startTransition(async () => {
       const updatedNewsletters = newsletters.filter(n => n !== newsletterToDelete)
@@ -204,8 +186,13 @@ export default function ProfileForm({ userId, initialData }: ProfileFormProps) {
             <FormItem>
               <FormLabel>Phone</FormLabel>
               <FormControl>
-                <Input placeholder="Enter your phone number" {...field} />
+                <Input placeholder="Enter your WhatsAppphone number in international format" {...field} />
               </FormControl>
+              <FormDescription>
+                Your WhatsApp phone number in international format, e.g.: +49 1520 3977304
+                <br />
+                In case you don't receive a welcome message after saving the changes, please double check your phone number.
+              </FormDescription>
               <FormMessage />
             </FormItem>
           )}
@@ -220,6 +207,11 @@ export default function ProfileForm({ userId, initialData }: ProfileFormProps) {
               <FormControl>
                 <Input placeholder="Enter newsletter emails (comma-separated)" {...field} />
               </FormControl>
+              <FormDescription>
+                Just copy and paste the email adresses of the newsletters you want to subscribe to.
+                <br />
+                e.g.: therundownai@mail.beehiiv.com, hi@ainauten.com
+              </FormDescription>
               <FormMessage />
             </FormItem>
           )}
@@ -266,15 +258,6 @@ export default function ProfileForm({ userId, initialData }: ProfileFormProps) {
         <div className="flex gap-4">
           <Button type="submit" disabled={isPending}>
             {isPending ? "Saving..." : "Save Changes"}
-          </Button>
-
-          <Button 
-            type="button" 
-            variant="secondary"
-            disabled={isTestingWhatsApp || !initialData?.phone}
-            onClick={handleTestWhatsApp}
-          >
-            {isTestingWhatsApp ? "Sending..." : "Receive first lettercast"}
           </Button>
         </div>
       </form>
