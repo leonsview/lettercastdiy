@@ -82,7 +82,7 @@ export async function updateProfileByStripeCustomerIdAction(
   try {
     const [updatedProfile] = await db
       .update(profilesTable)
-      .set(data)
+      .set({ ...data, updatedAt: new Date() })
       .where(eq(profilesTable.stripeCustomerId, stripeCustomerId))
       .returning()
 

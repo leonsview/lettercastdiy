@@ -1,5 +1,5 @@
 import { stripe } from "@/lib/stripe"
-import { auth } from "@clerk/nextjs/server"
+import { auth, currentUser } from "@clerk/nextjs/server"
 import { NextResponse } from "next/server"
 
 export async function POST() {
@@ -9,17 +9,22 @@ export async function POST() {
       return new NextResponse("Unauthorized", { status: 401 })
     }
 
+    const user = await currentUser()
+    if (!user?.emailAddresses?.[0]?.emailAddress) {
+      return new NextResponse("No email address found", { status: 400 })
+    }
+
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
 
     // Create a checkout session
     const session = await stripe.checkout.sessions.create({
-      success_url: `${baseUrl}/profile?success=true`,
+      success_url: `${baseUrl}/profile?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${baseUrl}/subscribe?canceled=true`,
       mode: "subscription",
       billing_address_collection: "auto",
       payment_method_types: ["card"],
       client_reference_id: userId,
-      customer_email: undefined, // Clerk will provide this
+      customer_email: user.emailAddresses[0].emailAddress,
       line_items: [
         {
           price: process.env.STRIPE_PRICE_ID,
@@ -27,7 +32,7 @@ export async function POST() {
         }
       ],
       metadata: {
-        userId: userId // Redundant but useful for webhook processing
+        userId: userId
       }
     })
 

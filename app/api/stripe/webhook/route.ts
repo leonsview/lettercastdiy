@@ -63,14 +63,22 @@ export async function POST(req: Request) {
             console.log("Processing checkout completion")
             await handleCheckoutSession(event)
             break
+
+          default:
+            console.log(`Unhandled event type: ${event.type}`)
         }
       } catch (error) {
         console.error("Error processing webhook:", error)
         return new Response(
-          JSON.stringify({ error: "Webhook processing failed" }), 
+          JSON.stringify({ 
+            error: "Webhook processing failed",
+            details: error instanceof Error ? error.message : "Unknown error"
+          }), 
           { status: 400 }
         )
       }
+    } else {
+      console.log(`Ignoring irrelevant event type: ${event.type}`)
     }
 
     return new Response(JSON.stringify({ received: true }), {
@@ -82,7 +90,10 @@ export async function POST(req: Request) {
   } catch (err) {
     console.error("Webhook signature verification failed:", err)
     return new Response(
-      JSON.stringify({ error: "Webhook signature verification failed" }), 
+      JSON.stringify({ 
+        error: "Webhook signature verification failed",
+        details: err instanceof Error ? err.message : "Unknown error"
+      }), 
       { status: 400 }
     )
   }
@@ -145,6 +156,4 @@ async function handleCheckoutSession(event: Stripe.Event) {
       throw error
     }
   }
-
-  return new Response(JSON.stringify({ received: true }))
 } 

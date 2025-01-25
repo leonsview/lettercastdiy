@@ -17,8 +17,7 @@ import Stripe from "stripe"
 type MembershipStatus = SelectProfile["membership"]
 
 const getMembershipStatus = (
-  subscription: Stripe.Subscription,
-  membership: MembershipStatus
+  subscription: Stripe.Subscription
 ): MembershipStatus => {
   const now = new Date()
   const periodEnd = new Date(subscription.current_period_end * 1000)
@@ -133,10 +132,7 @@ export const manageSubscriptionStatusChange = async (
     const product = await stripe.products.retrieve(productId)
     console.log("Product metadata:", product.metadata)
     
-    // Force pro membership for active subscriptions
-    const membership = "pro"
-
-    const membershipStatus = getMembershipStatus(subscription, membership)
+    const membershipStatus = getMembershipStatus(subscription)
     console.log("Calculated membership status", { membershipStatus })
 
     console.log("Updating profile by customer ID", { 
